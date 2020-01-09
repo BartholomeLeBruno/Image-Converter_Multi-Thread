@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "utils/stack.c"
 #include "bitmap.h"
 #include <stdint.h>
 #include <pthread.h>
@@ -28,6 +29,8 @@ typedef struct Img {
     Image original;
     Image new_i;
 } Img;
+
+Pixel pixels[__INT_MAX__];
 
 void* apply_effect(void * img);
 void* apply_effect(void * img) {
