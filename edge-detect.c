@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "bitmap.h"
 #include <stdint.h>
+#include <pthread.h>
 
 #define DIM 3
 #define LENGHT DIM
@@ -23,14 +24,18 @@ typedef struct Color_t {
 	float Blue;
 } Color_e;
 
+typedef struct Img {
+    Image original;
+    Image new_i;
+} Img;
 
-void apply_effect(Image* original, Image* new_i);
-void apply_effect(Image* original, Image* new_i) {
+void* apply_effect(void * img);
+void* apply_effect(void * img) {
 
-	int w = original->bmp_header.width;
-	int h = original->bmp_header.height;
+	int w = ((struct Img*)img)->original.bmp_header.width;
+	int h = ((struct Img*)img)->original.bmp_header.height;
 
-	*new_i = new_image(w, h, original->bmp_header.bit_per_pixel, original->bmp_header.color_planes);
+    ((struct Img*)img)->new_i = new_image(w, h, ((struct Img*)img)->original.bmp_header.bit_per_pixel, ((struct Img*)img)->original.bmp_header.color_planes);
 
 	for (int y = OFFSET; y < h - OFFSET; y++) {
 		for (int x = OFFSET; x < w - OFFSET; x++) {
@@ -41,7 +46,7 @@ void apply_effect(Image* original, Image* new_i) {
 					int xn = x + a - OFFSET;
 					int yn = y + b - OFFSET;
 
-					Pixel* p = &original->pixel_data[yn][xn];
+					Pixel* p = &(((struct Img*)img)->original).pixel_data[yn][xn];
 
 					c.Red += ((float) p->r) * KERNEL[a][b];
 					c.Green += ((float) p->g) * KERNEL[a][b];
@@ -49,7 +54,7 @@ void apply_effect(Image* original, Image* new_i) {
 				}
 			}
 
-			Pixel* dest = &new_i->pixel_data[y][x];
+			Pixel* dest = &(((struct Img*)img)->new_i).pixel_data[y][x];
 			dest->r = (uint8_t)  (c.Red <= 0 ? 0 : c.Red >= 255 ? 255 : c.Red);
 			dest->g = (uint8_t) (c.Green <= 0 ? 0 : c.Green >= 255 ? 255 : c.Green);
 			dest->b = (uint8_t) (c.Blue <= 0 ? 0 : c.Blue >= 255 ? 255 : c.Blue);
@@ -58,10 +63,11 @@ void apply_effect(Image* original, Image* new_i) {
 }
 
 int main(int argc, char** argv) {
-
-	Image img = open_bitmap("bmp_tank.bmp");
-	Image new_i;
-	apply_effect(&img, &new_i);
-	save_bitmap(new_i, "test_out.bmp");
+    struct Img *Img = (struct Img *)malloc(sizeof(struct Img));
+    pthread_t a;
+    Img->original = open_bitmap("bmp_tank.bmp");
+	pthread_create(&a, NULL, apply_effect, (void *)Img);
+	pthread_join(a, NULL);
+	save_bitmap(Img->new_i, "test_out.bmp");
 	return 0;
 }
