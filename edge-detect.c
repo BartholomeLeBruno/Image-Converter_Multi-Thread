@@ -1,5 +1,5 @@
 /*
-	//gcc edge-detect.c bitmap.c -O2 -ftree-vectorize -fopt-info -mavx2 -fopt-info-vec-all
+	//gcc edge-detect.c bitmap.c -O2 -ftree-vectorize -fopt-info -mavx2 -fopt-info-vec-all -pthread
 	//UTILISER UNIQUEMENT DES BMP 24bits
 */
 
