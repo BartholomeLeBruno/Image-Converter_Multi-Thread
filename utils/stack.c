@@ -24,15 +24,15 @@ int isfull() {
         return 0;
 }
 
-Pixel peek(Pixel* stack) {
+struct Img peek(struct Img* stack) {
     return stack[top];
 }
 
-Pixel pop(Pixel* stack) {
-    Pixel data;
+struct Img* pop(struct Img** stack) {
+    struct Img* data;
 
     if(!isempty()) {
-        data = stack[top];
+        *data = *stack[top];
         top = top - 1;
         return data;
     } else {
@@ -40,11 +40,11 @@ Pixel pop(Pixel* stack) {
     }
 }
 
-void push(Pixel data, Pixel* stack) {
-
+void push(struct Img* data, struct Img** stack) {
+    printf("sizeof : %d\n", sizeof(stack));
     if(!isfull()) {
         top = top + 1;
-        stack[top] = data;
+        *stack[top] = *data;
     } else {
         printf("Could not insert data, Stack is full.\n");
     }

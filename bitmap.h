@@ -125,6 +125,11 @@ typedef struct Pixel
     uint8_t i;
 } __attribute__((packed)) Pixel;
 
+typedef struct Color_t {
+	float Red;
+	float Green;
+	float Blue;
+} Color_e;
 /*!
  * \brief Structured type for an image.
  */

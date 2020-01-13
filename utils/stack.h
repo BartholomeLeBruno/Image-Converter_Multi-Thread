@@ -8,14 +8,21 @@
 #include <stdio.h>
 #include "../bitmap.h"
 
+typedef struct Img
+{
+	Image original;
+	Image new_i;
+} Img;
+
+
 int isempty();
 
 int isfull();
 
-Pixel peek(Pixel* stack);
+struct Img peek(struct Img* stack);
 
-Pixel pop(Pixel* stack);
+struct Img* pop(struct Img** stack);
 
-extern void push(Pixel data, Pixel* stack);
+extern void push(struct Img* data, struct Img** stack);
 
 #endif //IMAGE_CONVERTER_MULTI_THREAD_STACK_H
