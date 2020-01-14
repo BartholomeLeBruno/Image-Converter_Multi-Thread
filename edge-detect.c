@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "utils/stack.c"
+#include "utils/stack.h"
 #include "bitmap.h"
 #include <stdint.h>
 #include <pthread.h>
@@ -21,10 +21,10 @@ const float KERNEL[DIM][DIM] = {{-1, -1, -1},
 								{-1, 8, -1},
 								{-1, -1, -1}};
 
-struct Img *stackImg[50000];
+struct Img stackImg[50000];
 static pthread_cond_t is_imgOK;
 static pthread_mutex_t mutex;
-struct Img *openImage(char *path);
+struct Img openImage(char *path);
 void *producer(void *img);
 void *consumer();
 
@@ -34,7 +34,7 @@ void *apply_effect(void *img)
 
 	int w = ((struct Img *)img)->original.bmp_header.width;
 	int h = ((struct Img *)img)->original.bmp_header.height;
-	printf(" w,h : %d,%d\n", w, h);
+
 	((struct Img *)img)->new_i = new_image(w, h, ((struct Img *)img)->original.bmp_header.bit_per_pixel, ((struct Img *)img)->original.bmp_header.color_planes);
 
 	for (int y = OFFSET; y < h - OFFSET; y++)
@@ -68,14 +68,10 @@ void *apply_effect(void *img)
 
 void *producer(void *img)
 {
-	struct Img *imgToPush = openImage((char *)img);
-	printf("producer_avantmutex\n");
+	struct Img imgToPush = openImage((char *)img);
 	pthread_mutex_lock(&mutex);
-	printf("producer\n");
-	apply_effect(imgToPush);
-	printf(": %d beforepush\n", sizeof(stackImg));
-	push(imgToPush, &stackImg);
-	printf("afterpush\n");
+	apply_effect(&imgToPush);
+	push(imgToPush, stackImg);
 	pthread_mutex_unlock(&mutex);
 	pthread_cond_signal(&is_imgOK);
 }
@@ -84,16 +80,15 @@ void *consumer()
 {
 	pthread_mutex_lock(&mutex);
 	pthread_cond_wait(&is_imgOK, &mutex);
-	printf("beforepop\n");
-	struct Img *img = pop(&stackImg);
-	printf("afterpop\n");
-	save_bitmap(img->new_i, "voila.bmp");
+	struct Img img = pop(stackImg);
+    int w = img.original.bmp_header.width;
+	save_bitmap(img.new_i, "voila.bmp");
 	pthread_mutex_unlock(&mutex);
 }
-struct Img *openImage(char *path)
+struct Img openImage(char *path)
 {
-	struct Img *Img = (struct Img *)malloc(sizeof(struct Img));
-	Img->original = open_bitmap(path);
+	struct Img Img;
+	Img.original = open_bitmap(path);
 	return Img;
 }
 
@@ -111,13 +106,11 @@ int main(int argc, char **argv)
 	char imagePath[255] = "image/";
 	for (int i = 0; i < 1; i++)
 	{
-		printf("i : %d\n", i);
 		while ((dir = readdir(d)) != NULL)
 		{
 			if (strstr(dir->d_name, ".bmp") != NULL)
 			{
 				strcat(imagePath, dir->d_name);
-				printf("imagePath : %s\n", imagePath);
 				pthread_create(&threads[i], &attr, producer, imagePath);
 				break;
 			}

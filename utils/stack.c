@@ -2,7 +2,6 @@
 // Created by alexis on 09/01/20.
 //
 #include <stdio.h>
-#include "../bitmap.h"
 #include "stack.h"
 
 int MAXSIZE = __INT_MAX__;
@@ -28,11 +27,11 @@ struct Img peek(struct Img* stack) {
     return stack[top];
 }
 
-struct Img* pop(struct Img** stack) {
-    struct Img* data;
+struct Img pop(struct Img* stack) {
+    struct Img data;
 
     if(!isempty()) {
-        *data = *stack[top];
+        data = stack[top];
         top = top - 1;
         return data;
     } else {
@@ -40,11 +39,10 @@ struct Img* pop(struct Img** stack) {
     }
 }
 
-void push(struct Img* data, struct Img** stack) {
-    printf("sizeof : %d\n", sizeof(stack));
+void push(struct Img data, struct Img* stack) {
     if(!isfull()) {
         top = top + 1;
-        *stack[top] = *data;
+        stack[top] = data;
     } else {
         printf("Could not insert data, Stack is full.\n");
     }

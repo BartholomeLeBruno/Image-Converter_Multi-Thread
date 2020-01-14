@@ -21,8 +21,8 @@ int isfull();
 
 struct Img peek(struct Img* stack);
 
-struct Img* pop(struct Img** stack);
+struct Img pop(struct Img* stack);
 
-extern void push(struct Img* data, struct Img** stack);
+extern void push(struct Img data, struct Img* stack);
 
 #endif //IMAGE_CONVERTER_MULTI_THREAD_STACK_H
