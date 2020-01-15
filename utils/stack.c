@@ -23,10 +23,6 @@ int isfull() {
         return 0;
 }
 
-struct Img peek(struct Img* stack) {
-    return stack[top];
-}
-
 struct Img pop(struct Img* stack) {
     struct Img data;
 
