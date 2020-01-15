@@ -12,6 +12,7 @@ typedef struct Img
 {
 	Image original;
 	Image new_i;
+	char* name;
 } Img;
 
 
